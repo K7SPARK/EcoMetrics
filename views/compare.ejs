@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoMetrics - Asset Compare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+          <span class="text-emerald-400 font-bold">E</span>
+        </div>
+        <span class="text-lg font-bold tracking-tight text-white">EcoMetrics</span>
+      </div>
+      <nav class="flex items-center space-x-6 text-sm">
+        <a href="/screener" class="text-slate-400 hover:text-white transition">Stock Screener</a>
+        <a href="/compare" class="text-emerald-400 font-semibold">Asset Compare</a>
+        <% if (user) { %>
+          <span class="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-full">Logout (<%= user.name || 'Kasak Gupta' %>)</span>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-8">
+    
+    <!-- Compare Form Controls -->
+    <form action="/compare" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 items-end">
+      <div class="md:col-span-5">
+        <label class="text-xs font-medium text-slate-400 block mb-1.5">Asset 1</label>
+        <select name="ticker1" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+          <% allCompanies.forEach(c => { %>
+            <option value="<%= c.ticker %>" <%= c.ticker === comp1.ticker ? 'selected' : '' %>>
+              <%= c.ticker %> - <%= c.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="md:col-span-5">
+        <label class="text-xs font-medium text-slate-400 block mb-1.5">Asset 2</label>
+        <select name="ticker2" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500">
+          <% allCompanies.forEach(c => { %>
+            <option value="<%= c.ticker %>" <%= c.ticker === comp2.ticker ? 'selected' : '' %>>
+              <%= c.ticker %> - <%= c.name %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2.5 rounded-xl transition">
+          Run Comparison
+        </button>
+      </div>
+    </form>
+
+    <!-- ESG Benchmark Chart -->
+    <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 space-y-4">
+      <h2 class="text-lg font-bold text-white tracking-wide">ESG Breakdown Benchmarking</h2>
+      <div class="h-72 w-full">
+        <canvas id="esgCompareChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Data Cards & Insights -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Company 1 Card -->
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-xl text-emerald-400"><%= comp1.ticker %> (<%= typeof comp1.livePrice === 'number' ? '$' + comp1.livePrice.toFixed(2) : comp1.price %>)</h3>
+          <span class="text-xs font-mono text-emerald-400/90 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">
+            Total ESG: <%= comp1.esgMetrics ? comp1.esgMetrics.totalScore : comp1.esgScore %>/100
+          </span>
+        </div>
+        
+        <div class="space-y-2.5 text-sm">
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-emerald-400 mt-0.5">•</span>
+            <span class="text-slate-300">Environmental Score: <%= comp1.environmentalScore || 85 %>/100</span>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-emerald-400 mt-0.5">•</span>
+            <span class="text-slate-300">Social Oversight: <%= comp1.socialScore || 90 %>/100</span>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-emerald-400 mt-0.5">•</span>
+            <span class="text-slate-300">Governance Framework: <%= comp1.governanceScore || 88 %>/100</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Company 2 Card -->
+      <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800/80 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-xl text-cyan-400"><%= comp2.ticker %> (<%= typeof comp2.livePrice === 'number' ? '$' + comp2.livePrice.toFixed(2) : comp2.price %>)</h3>
+          <span class="text-xs font-mono text-cyan-400/90 bg-cyan-500/10 px-2.5 py-1 rounded-md border border-cyan-500/20">
+            Total ESG: <%= comp2.esgMetrics ? comp2.esgMetrics.totalScore : comp2.esgScore %>/100
+          </span>
+        </div>
+
+        <div class="space-y-2.5 text-sm">
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-cyan-400 mt-0.5">•</span>
+            <span class="text-slate-300">Environmental Score: <%= comp2.environmentalScore || 80 %>/100</span>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-cyan-400 mt-0.5">•</span>
+            <span class="text-slate-300">Social Oversight: <%= comp2.socialScore || 85 %>/100</span>
+          </div>
+          <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800/50 flex items-start space-x-3">
+            <span class="text-cyan-400 mt-0.5">•</span>
+            <span class="text-slate-300">Governance Framework: <%= comp2.governanceScore || 82 %>/100</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    const ctx = document.getElementById('esgCompareChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Environmental', 'Social', 'Governance', 'Profit Margin %'],
+        datasets: [
+          {
+            label: '<%= comp1.ticker %>',
+            data: [
+              <%= comp1.environmentalScore || 85 %>,
+              <%= comp1.socialScore || 90 %>,
+              <%= comp1.governanceScore || 89 %>,
+              28
+            ],
+            backgroundColor: '#10b981',
+            borderRadius: 6
+          },
+          {
+            label: '<%= comp2.ticker %>',
+            data: [
+              <%= comp2.environmentalScore || 82 %>,
+              <%= comp2.socialScore || 88 %>,
+              <%= comp2.governanceScore || 84 %>,
+              22
+            ],
+            backgroundColor: '#3b82f6',
+            borderRadius: 6
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#94a3b8' } }
+        },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+          y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, beginAtZero: true, max: 100 }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

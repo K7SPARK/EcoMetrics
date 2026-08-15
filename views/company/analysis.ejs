@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= company.companyName %> - ESG Analysis</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+    body { background-color: #0b0f19; color: #f3f4f6; min-height: 100vh; }
+    
+    header { background: #111827; border-bottom: 1px solid #1f2937; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand-section { display: flex; align-items: center; gap: 2rem; }
+    .brand { font-size: 1.3rem; font-weight: 800; color: #10b981; text-decoration: none; }
+    .nav-links { display: flex; gap: 1rem; list-style: none; }
+    .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.95rem; font-weight: 500; padding: 6px 12px; border-radius: 6px; }
+    .nav-links a.active { color: #10b981; background: rgba(16,185,129,0.1); }
+
+    .container { max-width: 850px; margin: 2rem auto; background: #111827; border: 1px solid #1f2937; border-radius: 16px; padding: 2.5rem; }
+    .header { display: flex; justify-content: space-between; border-bottom: 1px solid #1f2937; padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+    .score-badge { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 10px 18px; border-radius: 10px; text-align: center; }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; margin-bottom: 1.5rem; }
+    .card { background: #1f2937; padding: 1.25rem; border-radius: 10px; border: 1px solid #374151; }
+    .card label { color: #9ca3af; font-size: 0.8rem; font-weight: 600; display: block; margin-bottom: 6px; }
+    .card val { font-size: 1.2rem; font-weight: 700; color: #fff; }
+    .back-btn { color: #38bdf8; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-section">
+      <a href="/screener" class="brand">🌱 EcoMetrics</a>
+      <ul class="nav-links">
+        <li><a href="/screener">Screener</a></li>
+        <li><a href="/compare">Compare</a></li>
+        <li><a href="/company/<%= company.symbol %>" class="active">Analysis</a></li>
+      </ul>
+    </div>
+    <div class="user-info">
+      <a href="/logout" style="color:#ef4444; text-decoration:none;">Logout</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 style="color:#fff;"><%= company.companyName %> (<%= company.symbol %>)</h1>
+        <p style="color:#9ca3af; margin-top:4px;"><%= company.industry %> • <%= company.sector %></p>
+      </div>
+      <div class="score-badge">
+        <span style="font-size: 1.8rem; font-weight: 800; display: block;"><%= company.esgScore %></span>
+        <span style="font-size: 0.75rem;">ESG SCORE</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><label>Market Cap</label><val><%= company.marketCap %></val></div>
+      <div class="card"><label>Stock Price</label><val><%= company.price %></val></div>
+      <div class="card"><label>Carbon Footprint</label><val><%= company.carbonFootprint %></val></div>
+    </div>
+
+    <div class="grid">
+      <div class="card"><label>Environmental Score</label><val><%= company.environmentalScore %>/100</val></div>
+      <div class="card"><label>Social Score</label><val><%= company.socialScore %>/100</val></div>
+      <div class="card"><label>Governance Score</label><val><%= company.governanceScore %>/100</val></div>
+    </div>
+
+    <div style="background: #1f2937; padding: 1rem; border-radius: 8px; color: #d1d5db; margin-bottom: 1.5rem; font-size: 0.9rem;">
+      <%= company.description %>
+    </div>
+
+    <a href="/screener" class="back-btn">← Back to Screener</a>
+  </div>
+
+</body>
+</html>
